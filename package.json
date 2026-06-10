@@ -7,5 +7,5 @@
   "author": "Yaemi",
   "bin": { "yhk": "./bin/bridge.js" },
   "files": ["bin/", "lib/", "handlers/", "schemas/", "scripts/", "VERSION", "README.md"],
-  "repository": { "type": "git", "url": "https://github.com/yaemi/yaemi-claudecode" }
+  "repository": { "type": "git", "url": "https://github.com/Lce1b/yaemi-claudecode" }
 }
