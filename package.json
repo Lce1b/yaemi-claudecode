@@ -1,0 +1,11 @@
+{
+  "name": "yaemi-claudecode",
+  "version": "1.0.0",
+  "description": "Claude Code hook system — middleware pipeline, profile-gated, async-ready, zero dependencies",
+  "keywords": ["claude-code", "hooks", "quality-gate", "automation", "claude"],
+  "license": "MIT",
+  "author": "Yaemi",
+  "bin": { "yhk": "./bin/bridge.js" },
+  "files": ["bin/", "lib/", "handlers/", "schemas/", "scripts/", "VERSION", "README.md"],
+  "repository": { "type": "git", "url": "https://github.com/yaemi/yaemi-claudecode" }
+}

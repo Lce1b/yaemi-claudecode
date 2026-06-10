@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yaemi/yaemi-claudecode/schemas/hookrc.schema.json",
+  "title": "Yaemi Claudecode Hook Configuration",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "description": "Hook profile level",
+      "type": "string",
+      "enum": ["minimal", "standard", "strict"],
+      "default": "standard"
+    },
+    "disabled": {
+      "description": "Handler IDs to disable",
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "sink": {
+      "description": "Output sink mode",
+      "type": "string",
+      "enum": ["stdout", "null"],
+      "default": "stdout"
+    },
+    "handlersDir": {
+      "description": "Custom handlers directory relative to project root",
+      "type": "string"
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "fileSize": {
+          "description": "Maximum allowed file lines",
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 5000,
+          "default": 800
+        },
+        "formatTimeout": {
+          "description": "Formatter timeout in ms",
+          "type": "integer",
+          "minimum": 1000,
+          "default": 30000
+        }
+      }
+    }
+  }
+}
