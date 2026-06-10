@@ -4,7 +4,7 @@ const fs = require('fs');
 const { getAccumFile } = require('../../lib/utils');
 const TRACKED_EXT = /\.(py|js|ts|jsx|tsx)$/i;
 
-function appendPath(fp, accumFile) { if (!fp || !TRACKED_EXT.test(fp)) return; try { var existing = []; if (fs.existsSync(accumFile)) existing = fs.readFileSync(accumFile, 'utf8').split('\\n').filter(Boolean); for (var i = 0; i < existing.length; i++) { if (existing[i].trim() === fp) return; } existing.push(fp); fs.writeFileSync(accumFile, existing.join('\\n') + '\\n', 'utf8'); } catch (_) {} }
+function appendPath(fp, accumFile) { if (!fp || !TRACKED_EXT.test(fp)) return; try { var existing = []; if (fs.existsSync(accumFile)) existing = fs.readFileSync(accumFile, 'utf8').split('\n').filter(Boolean); for (var i = 0; i < existing.length; i++) { if (existing[i].trim() === fp) return; } existing.push(fp); fs.writeFileSync(accumFile, existing.join('\n') + '\n', 'utf8'); } catch (_) {} }
 
 module.exports = {
   on: 'PostToolUse',

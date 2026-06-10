@@ -21,7 +21,7 @@ module.exports = {
   priority: 60,
   profile: ['strict'],
   run: async function(event, ctx) {
-    var cmd = extractCmd(JSON.stringify(event));
+    var cmd = extractCmd(event);
     if (!cmd || !cmd.includes('git commit') || !cmd.includes('-m')) {
       return { exitCode: 0 };
     }

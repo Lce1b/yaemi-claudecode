@@ -11,17 +11,17 @@ module.exports = {
   priority: 50,
   profile: ['standard', 'strict'],
   run: async function(event, ctx) {
-    var sessionId = event.session_id || 'unknown';
-    var cwd = event.cwd || process.cwd();
+    const sessionId = event.session_id || 'unknown';
+    const cwd = event.cwd || process.cwd();
 
-    var lastUserMessage = '';
+    let lastUserMessage = '';
     if (event.last_user_message) {
       lastUserMessage = String(event.last_user_message).substring(0, 500);
     } else if (event.prompt) {
       lastUserMessage = String(event.prompt).substring(0, 500);
     }
 
-    var snapshot = {
+    const snapshot = {
       timestamp: new Date().toISOString(),
       session_id: sessionId,
       cwd: cwd,
@@ -29,10 +29,10 @@ module.exports = {
       event_name: 'PreCompact',
     };
 
-    var snapshotsDir = config.DATA_DIR + '/sessions';
+    const snapshotsDir = config.DATA_DIR + '/sessions';
     ensureDir(snapshotsDir);
 
-    var filePath = path.join(snapshotsDir, '.compact-snapshot.json');
+    const filePath = path.join(snapshotsDir, '.compact-snapshot.json');
     atomicWrite(filePath, snapshot);
 
     debugLog('PreCompact snapshot saved (session: ' + sessionId + ')');

@@ -28,29 +28,17 @@ function getSessionId(event) {
 
 function readCounter(counterFile) {
   try {
-    const fd = fs.openSync(counterFile, 'a+');
-    try {
-      const buf = Buffer.alloc(32);
-      const bytesRead = fs.readSync(fd, buf, 0, 32, 0);
-      if (bytesRead > 0) {
-        const parsed = parseInt(buf.toString('utf8', 0, bytesRead).trim(), 10);
-        if (isFinite(parsed) && parsed > 0 && parsed <= 1000000) return parsed;
-      }
-    } finally {
-      fs.closeSync(fd);
-    }
+    const raw = fs.readFileSync(counterFile, 'utf8').trim();
+    if (!raw) return 0;
+    const parsed = parseInt(raw, 10);
+    if (isFinite(parsed) && parsed > 0 && parsed <= 1000000) return parsed;
   } catch (_) { /* best-effort */ }
   return 0;
 }
 
 function writeCounter(counterFile, count) {
   try {
-    const fd = fs.openSync(counterFile, 'w');
-    try {
-      fs.writeSync(fd, String(count), 0);
-    } finally {
-      fs.closeSync(fd);
-    }
+    fs.writeFileSync(counterFile, String(count), 'utf8');
   } catch (_) { /* best-effort */ }
 }
 

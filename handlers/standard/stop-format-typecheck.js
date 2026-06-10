@@ -12,7 +12,7 @@ module.exports = {
     var sid = event.session_id || '', accumFile = getAccumFile(sid);
     var raw; try { raw = fs.readFileSync(accumFile, 'utf8'); } catch (_) { return { exitCode: 0 }; }
     try { fs.unlinkSync(accumFile); } catch (_) {}
-    var lines = raw.split('\\n').map(function(l){return l.trim();}).filter(Boolean);
+    var lines = raw.split('\n').map(function(l){return l.trim();}).filter(Boolean);
     if (lines.length === 0) return { exitCode: 0 };
     var seen = {}, files = [];
     for (var i = 0; i < lines.length; i++) { if (!seen[lines[i]]) { seen[lines[i]] = true; files.push(lines[i]); } }

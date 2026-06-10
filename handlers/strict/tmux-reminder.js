@@ -28,7 +28,7 @@ module.exports = {
   priority: 56,
   profile: ['standard', 'strict'],
   run: async function(event, ctx) {
-    var cmd = extractCmd(JSON.stringify(event));
+    const cmd = extractCmd(event);
     if (!cmd || !isLongRunning(cmd) || inTmux()) return { exitCode: 0 };
 
     ctx.warn('[Hook] Long-running command detected outside tmux. If this blocks, you\'ll lose log access. Consider running in tmux.\n');

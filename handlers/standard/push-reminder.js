@@ -8,7 +8,7 @@ module.exports = {
   priority: 62,
   profile: ['strict'],
   run: async function(event, ctx) {
-    var cmd = extractCmd(JSON.stringify(event));
+    var cmd = extractCmd(event);
     if (!cmd || !/git\s+push/.test(cmd)) return { exitCode: 0 };
 
     var m = cmd.match(/git\s+push\s+(\S+)\s+(\S+)/);

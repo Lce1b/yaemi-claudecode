@@ -13,6 +13,7 @@
 const path = require('path');
 const fs = require('fs');
 const config = require('../../lib/config');
+const { atomicWrite } = require('../../lib/state-store');
 
 const STATE_FILE = path.join(config.DATA_DIR, 'mcp-health.json');
 
@@ -32,21 +33,6 @@ function markUnhealthy(state, server, now, reason, detail) {
   s.lastFailureReason = reason;
   if (detail) s.lastFailureDetail = detail.substring(0, 500);
   s.status = 'unhealthy';
-}
-
-function atomicWrite(filePath, data) {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const tmp = filePath + '.tmp.' + process.pid + '.' + Date.now();
-  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
-  try {
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    fs.renameSync(tmp, filePath);
-  } catch (e) {
-    try { fs.writeFileSync(filePath, fs.readFileSync(tmp)); } finally {
-      try { fs.unlinkSync(tmp); } catch (_) {}
-    }
-  }
 }
 
 function extractMcpTarget(input) {

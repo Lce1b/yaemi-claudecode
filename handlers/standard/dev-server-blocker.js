@@ -29,7 +29,7 @@ module.exports = {
   priority: 58,
   profile: ['strict'],
   run: async function(event, ctx) {
-    var cmd = extractCmd(JSON.stringify(event));
+    var cmd = extractCmd(event);
     if (!cmd || !isDevServer(cmd) || inTmux()) return { exitCode: 0 };
 
     ctx.error('[Hook] BLOCKED: Dev server outside tmux. Run in tmux first so you don\'t lose log access: tmux new -s dev\n');

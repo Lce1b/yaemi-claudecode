@@ -84,13 +84,48 @@ module.exports = {
     var target = extractMcpTarget(event);
     if (!target) return { exitCode: 0 };
     var now = Date.now(), state = loadState(), prev = state.servers[target.server] || {};
+
+    // Still healthy — skip
     if (prev.status === 'healthy' && Number(prev.expiresAt || 0) > now) return { exitCode: 0 };
-    if (prev.status === 'unhealthy' && Number(prev.nextRetryAt || 0) > now) { ctx.error('[MCPHealth] ' + target.server + ' is unavailable'); return { exitCode: 2 }; }
+
+    // Known unhealthy, still in backoff — block
+    if (prev.status === 'unhealthy' && Number(prev.nextRetryAt || 0) > now) {
+      ctx.error('[MCPHealth] ' + target.server + ' is unavailable');
+      return { exitCode: 2 };
+    }
+
+    // Cache expired but previously healthy — allow through, probe in background
+    if (prev.status === 'healthy' && Number(prev.expiresAt || 0) <= now) {
+      probeServer(target.server).then(function(probe) {
+        var bgState = loadState();
+        var bgPrev = bgState.servers[target.server] || {};
+        if (probe.ok) {
+          markHealthy(bgState, target.server, Date.now(), { lastRestoredAt: bgPrev.lastRestoredAt });
+        } else {
+          markUnhealthy(bgState, target.server, Date.now(), probe.failureCode, probe.reason);
+        }
+        atomicWrite(STATE_FILE, bgState);
+      }).catch(function() {});
+      return { exitCode: 0 };
+    }
+
+    // Unknown server — probe synchronously (first time)
     var probe = await probeServer(target.server);
-    if (probe.ok === null) { markHealthy(state, target.server, now, { lastRestoredAt: prev.lastRestoredAt }); atomicWrite(STATE_FILE, state); return { exitCode: 0 }; }
-    if (probe.ok) { if (prev.status === 'unhealthy') ctx.log('[MCPHealth] ' + target.server + ' connection restored'); markHealthy(state, target.server, now, { lastRestoredAt: prev.lastRestoredAt }); atomicWrite(STATE_FILE, state); return { exitCode: 0 }; }
-    markUnhealthy(state, target.server, now, probe.failureCode, probe.reason); atomicWrite(STATE_FILE, state);
-    ctx.error('[MCPHealth] ' + target.server + ' is unavailable (' + probe.reason + ')'); return { exitCode: 2 };
+    if (probe.ok === null) {
+      markHealthy(state, target.server, now, { lastRestoredAt: prev.lastRestoredAt });
+      atomicWrite(STATE_FILE, state);
+      return { exitCode: 0 };
+    }
+    if (probe.ok) {
+      if (prev.status === 'unhealthy') ctx.log('[MCPHealth] ' + target.server + ' connection restored');
+      markHealthy(state, target.server, now, { lastRestoredAt: prev.lastRestoredAt });
+      atomicWrite(STATE_FILE, state);
+      return { exitCode: 0 };
+    }
+    markUnhealthy(state, target.server, now, probe.failureCode, probe.reason);
+    atomicWrite(STATE_FILE, state);
+    ctx.error('[MCPHealth] ' + target.server + ' is unavailable (' + probe.reason + ')');
+    return { exitCode: 2 };
   },
   markUnhealthy, loadState,
 };

@@ -62,7 +62,8 @@ function countEditLines(toolInput) {
 
   const index = currentContent.indexOf(oldStr);
   if (index === -1) {
-    return currentContent.split('\n').length + newStr.split('\n').length;
+    // old_string not found — file may have changed externally. Estimate conservatively.
+    return Math.max(currentContent.split('\n').length, newStr.split('\n').length);
   }
 
   const result = currentContent.substring(0, index) + newStr + currentContent.substring(index + oldStr.length);

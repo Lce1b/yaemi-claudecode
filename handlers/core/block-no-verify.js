@@ -8,7 +8,7 @@ module.exports = {
   priority: 52,
   profile: ['minimal', 'standard', 'strict'],
   run: async function(event, ctx) {
-    var cmd = extractCmd(JSON.stringify(event));
+    var cmd = extractCmd(event);
     if (!cmd) return { exitCode: 0 };
 
     if (/--no-verify/.test(cmd) || /--no-gpg-sign/.test(cmd)) {

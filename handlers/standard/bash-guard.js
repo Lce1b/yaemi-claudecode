@@ -15,7 +15,7 @@ module.exports = {
   priority: 50,
   profile: ['minimal', 'standard', 'strict'],
   run: async function(event, ctx) {
-    var cmd = extractCmd(JSON.stringify(event));
+    const cmd = extractCmd(event);
     if (cmd && READONLY_CMD.test(cmd)) {
       return { exitCode: 0 };
     }

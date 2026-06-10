@@ -207,7 +207,8 @@ test('countEditLines handles replacement (non-empty oldStr) with non-existent fi
     old_string: 'foo',
     new_string: 'bar\nbaz'
   });
-  assert.strictEqual(result, 3);
+  // When old_string is not found in non-existent file: Math.max(1, 2) = 2
+  assert.strictEqual(result, 2);
 });
 
 // ---- checkFile ----
