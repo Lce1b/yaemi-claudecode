@@ -1,6 +1,6 @@
 {
   "name": "yaemi-claudecode",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Claude Code hook system — middleware pipeline, profile-gated, async-ready, zero dependencies",
   "keywords": [
     "claude-code",
@@ -9,6 +9,9 @@
     "automation",
     "claude"
   ],
+  "scripts": {
+    "test": "bash __tests__/run.sh"
+  },
   "license": "MIT",
   "author": "Yaemi",
   "bin": {
