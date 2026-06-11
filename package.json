@@ -1,6 +1,6 @@
 {
   "name": "yaemi-claudecode",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Claude Code hook system — middleware pipeline, profile-gated, async-ready, zero dependencies",
   "keywords": [
     "claude-code",

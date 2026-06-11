@@ -3,7 +3,7 @@
 > Claude Code 的安全带。给实习生装上，他删不掉代码、推不了密钥、跳不过 CI。
 > 等你看到他 commit message 全是 `feat:` 开头、文件从不超过 800 行、每次改完自动格式化 —— 你会回来谢我。
 
-Hook pipeline for [Claude Code](https://claude.ai/code) that sits between Claude and your codebase like a code-reviewing coworker who never sleeps. **Zero dependencies.** 35 handlers. 3 profiles. 7 hook events.
+Hook pipeline for [Claude Code](https://claude.ai/code) that sits between Claude and your codebase like a code-reviewing coworker who never sleeps. **Zero dependencies.** 36 handlers. 3 profiles. 7 hook events.
 
 **The pitch in one sentence:** One `npm install -g` and your junior dev's Claude Code stops being a loose cannon — no secrets in commits, no `--no-verify`, no `rm -rf`, no force push, no editing without understanding what depends on it. Auto-formats on save. Warns when tests are missing. And with **CodeGraph + DeepSeek**: AST-level code review that fires automatically when the diff gets real — callers, callees, impact analysis, sub-second turnaround, sub-cent cost.
 
@@ -55,9 +55,9 @@ Start with `YAEMI_HOOK_PROFILE=standard` in your settings.json `env` section, or
 
 | Profile | Handlers | What you get |
 |---------|----------|-------------|
-| `minimal` | 4 | Secret scan, block `--no-verify`, block destructive commands, tool failure handler |
-| `standard` | 18 | All of minimal + commit quality, file size guard, format-on-save, MCP health, push reminder, gate guard, test reminder, batch format/typecheck on stop |
-| `strict` | 35 | All of standard + LLM auto-review, cost tracking, desktop notify, debug statement check, design quality, session tracking, pre-compact, build-on-stop |
+| `minimal` | 5 | Secret scan, block `--no-verify`, block destructive commands, tool failure handler |
+| `standard` | 19 | All of minimal + commit quality, file size guard, format-on-save, MCP health, push reminder, gate guard, test reminder, batch format/typecheck on stop |
+| `strict` | 36 | All of standard + LLM auto-review, cost tracking, desktop notify, debug statement check, design quality, session tracking, pre-compact, build-on-stop |
 
 Switch at any time:
 
@@ -90,6 +90,7 @@ yhk status                show hook status and profile
 | block-secrets | PreToolUse | 45 | Scans `git commit -m` for API keys, private keys, JWT tokens, hardcoded passwords. Blocks with exitCode 2 on match. |
 | block-no-verify | PreToolUse | 52 | Rejects `--no-verify` and `--no-gpg-sign` flags. Hooks exist for a reason. |
 | block-destructive | PreToolUse | 54 | Blocks `rm -rf`, `git reset --hard`, `git push --force`, `git clean -fdx`, and Windows equivalents. |
+| block-shell-injection | PreToolUse | 46 | Blocks curl/wget pipe-to-shell, reverse shells (netcat, bash /dev/tcp, Python, Perl, Ruby, PHP), base64 decode+exec, privilege escalation (chmod 777, setuid, sudo su), credential exfiltration, and sensitive file reads. |
 | post-tool-use-failure | PostToolUseFailure | 500 | Handles tool failure events gracefully. |
 
 ### Standard (minimal + these)
@@ -333,7 +334,7 @@ Tests follow a consistent pattern — CommonJS, custom `test()` harness, `proces
 > Claude Code 的安全带。给实习生装上，他删不掉代码、推不了密钥、跳不过 CI。
 > 等你看到他 commit message 全是 `feat:` 开头、文件从不超过 800 行、每次改完自动格式化 —— 你会回来谢我。
 
-坐在 Claude 和你的代码库之间的 Hook 管道，像一个永远不会下班的 code reviewer。**零依赖。** 35 个处理器。3 个 Profile。7 个 Hook 事件。
+坐在 Claude 和你的代码库之间的 Hook 管道，像一个永远不会下班的 code reviewer。**零依赖。** 36 个处理器。3 个 Profile。7 个 Hook 事件。
 
 **一句话说清楚：** 一个 `npm install -g`，你手下实习生的 Claude Code 就不再是脱缰野马 —— 密钥推不上去、`--no-verify` 跳不过去、`rm -rf` 删不掉、force push 按不下去、不了解依赖关系就改不了文件。保存自动格式化。缺测试会提醒。配上 **CodeGraph + DeepSeek**：改动大了自动跑 AST 级代码审查 —— 调用者分析、影响范围、子秒响应、次美分成本。
 
@@ -381,9 +382,9 @@ yhk install
 
 | Profile | 处理器数 | 内容 |
 |---------|---------|------|
-| `minimal` | 4 | 密钥扫描、禁止 `--no-verify`、禁止危险命令、工具失败处理 |
-| `standard` | 18 | minimal 全部 + 提交规范检查、文件大小门禁、保存时自动格式化、MCP 健康探测、推送提醒、GateGuard 上下文门禁、测试提醒、会话结束时批量格式化+类型检查 |
-| `strict` | 35 | standard 全部 + LLM 自动代码审查、成本追踪、桌面通知、debug 语句检查、设计质量、会话追踪、压缩前准备、结束时构建验证 |
+| `minimal` | 5 | 密钥扫描、禁止 `--no-verify`、禁止危险命令、工具失败处理 |
+| `standard` | 19 | minimal 全部 + 提交规范检查、文件大小门禁、保存时自动格式化、MCP 健康探测、推送提醒、GateGuard 上下文门禁、测试提醒、会话结束时批量格式化+类型检查 |
+| `strict` | 36 | standard 全部 + LLM 自动代码审查、成本追踪、桌面通知、debug 语句检查、设计质量、会话追踪、压缩前准备、结束时构建验证 |
 
 随时切换：
 
@@ -416,6 +417,7 @@ yhk status                查看 hook 状态和当前 Profile
 | block-secrets | PreToolUse | 45 | 扫描 `git commit -m` 中的 API 密钥、私钥、JWT Token、硬编码密码，命中则拦截 |
 | block-no-verify | PreToolUse | 52 | 禁止 `--no-verify` 和 `--no-gpg-sign`，hook 就是用来跑的 |
 | block-destructive | PreToolUse | 54 | 拦截 `rm -rf`、`git reset --hard`、`git push --force`、`git clean -fdx` 等危险命令 |
+| block-shell-injection | PreToolUse | 46 | 拦截 curl/wget 管道到 shell、反弹 shell（nc、bash /dev/tcp、Python、Perl、Ruby、PHP）、base64 解码执行、提权（chmod 777、setuid、sudo su）、凭据外泄、敏感文件读取 |
 | post-tool-use-failure | PostToolUseFailure | 500 | 优雅处理工具执行失败事件 |
 
 ### Standard（minimal + 以下）
@@ -638,7 +640,7 @@ npm test                    # 跑全部 18 个测试套件，300+ 条测试
 
 **可以脱离桌宠单独使用吗？** 可以。这是独立的 npm 包。桌宠是通过 Sink 系统消费 Hook 事件的独立项目，Hook 系统完全独立运行。
 
-**为什么不直接用 Claude Code 内置 Hook？** 你确实在用。`yhk install` 把 bridge 命令写入 `settings.json` 的 hooks 配置。Yaemi Claudecode 是在原生 Hook 系统之上的管道 — 增加了 Profile 分级、优先级排序、Context API、Sink 系统和 35 个预置处理器，让你不用从零写起。
+**为什么不直接用 Claude Code 内置 Hook？** 你确实在用。`yhk install` 把 bridge 命令写入 `settings.json` 的 hooks 配置。Yaemi Claudecode 是在原生 Hook 系统之上的管道 — 增加了 Profile 分级、优先级排序、Context API、Sink 系统和 36 个预置处理器，让你不用从零写起。
 
 **和 ECC Hook 系统什么关系？** 提取自同一代码库。Yaemi Claudecode 是驱动八重神子桌宠的 Hook 管道的独立 npm 发行版。ECC 用户通过规则/技能安装获得相同的处理器。
 
