@@ -300,6 +300,16 @@ Then run with `YAEMI_HOOK_SINK=miko` — the desktop pet receives review suggest
 
 **Path sandbox.** Handler files are validated to be inside the plugin root before loading — prevents path traversal from compromised config.
 
+## Development
+
+```bash
+git clone https://github.com/Lce1b/yaemi-claudecode.git
+cd yaemi-claudecode
+npm test                    # runs all 18 test suites, 300+ tests
+```
+
+Tests follow a consistent pattern — CommonJS, custom `test()` harness, `process.exit(1)` on failure — with zero test framework dependencies. Each handler's pure functions are extracted and tested in isolation. Filesystem-dependent logic uses temporary directories.
+
 ## FAQ
 
 **Does this work with other LLM providers?** Yes. The hook system itself is provider-agnostic. Auto-review uses the Anthropic-compatible API format — DeepSeek, OpenRouter, or any compatible endpoint works.
@@ -611,6 +621,16 @@ registerSink('miko', {
 **安全关键 Hook 绝不静默退出。** PreToolUse 和 SessionStart 的拦截始终传播 exitCode。其他事件优雅降级。
 
 **路径沙箱。** 处理器文件加载前验证在插件根目录内 — 防止配置被篡改后的路径遍历攻击。
+
+## 开发
+
+```bash
+git clone https://github.com/Lce1b/yaemi-claudecode.git
+cd yaemi-claudecode
+npm test                    # 跑全部 18 个测试套件，300+ 条测试
+```
+
+测试遵循统一模式 — CommonJS、自定义 `test()` 框架、`process.exit(1)` 失败退出 — 零测试框架依赖。每个处理器的纯函数被抽取并隔离测试。涉及文件系统的逻辑使用临时目录。
 
 ## FAQ
 
