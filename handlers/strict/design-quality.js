@@ -15,23 +15,41 @@ const SIGNALS = [
   { pattern: /\brounded-xl\b/, label: 'rounded-xl' },
 ];
 
-function detectSignals(content) { var found = []; for (var i = 0; i < SIGNALS.length; i++) { if (SIGNALS[i].pattern.test(content)) found.push(SIGNALS[i].label); } return found; }
+function detectSignals(content) {
+  const found = [];
+  for (let i = 0; i < SIGNALS.length; i++) {
+    if (SIGNALS[i].pattern.test(content)) found.push(SIGNALS[i].label);
+  }
+  return found;
+}
 
 module.exports = {
   on: 'PostToolUse',
-  match: (event) => { var t = event.tool_name || ''; return t === 'Write' || t === 'Edit' || t === 'MultiEdit'; },
+  match: (event) => { const t = event.tool_name || ''; return t === 'Write' || t === 'Edit' || t === 'MultiEdit'; },
   priority: 200, profile: ['standard', 'strict'],
   async run(event, ctx) {
     if (!isHookEnabled('design-quality')) return { exitCode: 0 };
-    var ti = event.tool_input || {};
-    var filePaths = ti.file_path ? [String(ti.file_path)] : Array.isArray(ti.edits) ? ti.edits.map(function(e){return e&&e.file_path?String(e.file_path):'';}).filter(Boolean) : [];
-    var fp = [];
-    for (var i = 0; i < filePaths.length; i++) { if (FRONTEND_EXT.test(filePaths[i])) fp.push(filePaths[i]); }
+    const ti = event.tool_input || {};
+    let filePaths;
+    if (ti.file_path) {
+      filePaths = [String(ti.file_path)];
+    } else if (Array.isArray(ti.edits)) {
+      filePaths = [];
+      for (let ei = 0; ei < ti.edits.length; ei++) {
+        const ep = ti.edits[ei] && ti.edits[ei].file_path;
+        if (ep) filePaths.push(String(ep));
+      }
+    } else {
+      filePaths = [];
+    }
+    const fp = [];
+    for (let i = 0; i < filePaths.length; i++) { if (FRONTEND_EXT.test(filePaths[i])) fp.push(filePaths[i]); }
     if (fp.length === 0) return { exitCode: 0 };
-    var findings = [];
-    for (var j = 0; j < fp.length; j++) { try { findings = findings.concat(detectSignals(fs.readFileSync(path.resolve(fp[j]), 'utf8'))); } catch (_) {} }
-    var seen = {}, unique = [];
-    for (var k = 0; k < findings.length; k++) { if (!seen[findings[k]]) { seen[findings[k]] = true; unique.push(findings[k]); } }
+    let findings = [];
+    for (let j = 0; j < fp.length; j++) { try { findings = findings.concat(detectSignals(fs.readFileSync(path.resolve(fp[j]), 'utf8'))); } catch (_) {} }
+    const seen = {};
+    const unique = [];
+    for (let k = 0; k < findings.length; k++) { if (!seen[findings[k]]) { seen[findings[k]] = true; unique.push(findings[k]); } }
     if (unique.length < 2) return { exitCode: 0 };
     ctx.warn('[Hook] DESIGN CHECK: Generic/template signals detected: ' + unique.join(', ') + ' in ' + fp.join(', '));
     return { exitCode: 0 };

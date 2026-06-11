@@ -9,20 +9,24 @@
 
 const { execFileSync } = require('child_process');
 
-function esc(s) {
-  return String(s).replace(/["\\]/g, '\\$&');
+function escAppleScript(s) {
+  return String(s).replace(/["\\]/g, function(c) { return '\\' + c; });
+}
+
+function escPowerShell(s) {
+  return String(s).replace(/[`'"]/g, function(c) { return c === "'" ? "''" : '`' + c; });
 }
 
 function notify(title, message) {
   try {
     if (process.platform === 'darwin') {
       execFileSync('osascript', [
-        '-e', 'display notification "' + esc(message) + '" with title "' + esc(title) + '"'
+        '-e', 'display notification "' + escAppleScript(message) + '" with title "' + escAppleScript(title) + '"'
       ], { timeout: 5000 });
     } else if (process.platform === 'win32') {
       const ps = '$t=[Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent(1);' +
-        '$t.SelectSingleNode("//text[1]").InnerText="' + esc(title) + '";' +
-        '$t.SelectSingleNode("//text[2]").InnerText="' + esc(message) + '"';
+        '$t.SelectSingleNode("//text[1]").InnerText=\'' + escPowerShell(title) + '\';' +
+        '$t.SelectSingleNode("//text[2]").InnerText=\'' + escPowerShell(message) + '\'';
       execFileSync('powershell', ['-Command', ps], { timeout: 5000, windowsHide: true });
     } else {
       execFileSync('notify-send', [title, message], { timeout: 5000 });

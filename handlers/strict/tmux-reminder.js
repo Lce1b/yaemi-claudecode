@@ -1,15 +1,10 @@
 'use strict';
 
-const extractCmd = require('../../lib/utils').extractCmd;
-
+const { extractCmd, inTmux } = require('../../lib/utils');
 const { DEV_SERVER_PATTERNS } = require('../../lib/config');
 
 function isLongRunning(cmd) {
   return DEV_SERVER_PATTERNS.some(function(re) { return re.test(cmd); });
-}
-
-function inTmux() {
-  return process.env.TMUX !== undefined && process.env.TMUX !== '';
 }
 
 module.exports = {

@@ -43,5 +43,5 @@ module.exports = {
     }
     return { exitCode: 0 };
   },
-  scanForSecrets, truncateText,
+  scanForSecrets, truncateText, isGovernanceDisabled, MAX_TEXT_LENGTH,
 };

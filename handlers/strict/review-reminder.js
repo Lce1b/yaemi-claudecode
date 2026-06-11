@@ -11,19 +11,21 @@
  * Cooldown: 5 edits between reminders
  */
 
-var fs = require('fs');
-var path = require('path');
-var config = require('../../lib/config');
-var { runReview } = require('../../lib/auto-review');
+const fs = require('fs');
+const path = require('path');
+const config = require('../../lib/config');
+const { runReview } = require('../../lib/auto-review');
 
-var REVIEW_STATE_DIR = path.join(config.DATA_DIR, 'review-state');
-var FILE_THRESHOLD = 3, LINE_THRESHOLD = 200, COOLDOWN_EDITS = 5;
+const REVIEW_STATE_DIR = path.join(config.DATA_DIR, 'review-state');
+const FILE_THRESHOLD = 3;
+const LINE_THRESHOLD = 200;
+const COOLDOWN_EDITS = 5;
 
 function loadState(sid) {
   try { fs.mkdirSync(REVIEW_STATE_DIR, { recursive: true }); } catch (_) {}
-  var fp = path.join(REVIEW_STATE_DIR, 'state-' + sid + '.json');
+  const fp = path.join(REVIEW_STATE_DIR, 'state-' + sid + '.json');
   try { return JSON.parse(fs.readFileSync(fp, 'utf8')); }
-  catch (_) { return { files: {}, totalLines: 0, lastReminderAt: -COOLDOWN_EDITS, reminderCount: 0 }; }
+  catch (_) { return { files: {}, totalLines: 0, lastReminderAt: 0, callCount: 0, reminderCount: 0 }; }
 }
 
 function saveState(sid, state) {
@@ -39,21 +41,25 @@ function countLinesInEdit(edit) {
 module.exports = {
   on: 'PostToolUse',
   match: function(event) {
-    var t = event.tool_name || '';
+    const t = event.tool_name || '';
     return t === 'Write' || t === 'Edit' || t === 'MultiEdit';
   },
   priority: 400,
   profile: ['standard', 'strict'],
 
   async run(event, ctx) {
-    var tn = event.tool_name || '', ti = event.tool_input || {}, sid = event.session_id || 'unknown';
-    var state = loadState(sid);
+    const tn = event.tool_name || '';
+    const ti = event.tool_input || {};
+    const sid = event.session_id || 'unknown';
+    const state = loadState(sid);
 
-    var fp = ti.file_path || '', files = [fp], totalNew = 0;
+    const fp = ti.file_path || '';
+    let files = [fp];
+    let totalNew = 0;
     if (tn === 'MultiEdit') {
-      var edits = ti.edits || [];
+      const edits = ti.edits || [];
       files = [];
-      for (var i = 0; i < edits.length; i++) {
+      for (let i = 0; i < edits.length; i++) {
         files.push(edits[i].file_path || '');
         totalNew += countLinesInEdit(edits[i]);
       }
@@ -62,10 +68,13 @@ module.exports = {
       if (tn === 'Write') totalNew = ((ti.content || '').match(/\n/g) || []).length;
     }
 
-    for (var f = 0; f < files.length; f++) { if (files[f]) state.files[files[f]] = true; }
+    for (let f = 0; f < files.length; f++) { if (files[f]) state.files[files[f]] = true; }
     state.totalLines += totalNew;
 
-    var fc = Object.keys(state.files).length, triggered = false, reason = '';
+    state.callCount = (state.callCount || 0) + 1;
+    const fc = Object.keys(state.files).length;
+    let triggered = false;
+    let reason = '';
     if (fc >= FILE_THRESHOLD && state.totalLines >= LINE_THRESHOLD) {
       reason = fc + ' files, ' + state.totalLines + ' lines'; triggered = true;
     } else if (fc >= FILE_THRESHOLD * 2) {
@@ -74,10 +83,10 @@ module.exports = {
       reason = state.totalLines + ' lines'; triggered = true;
     }
 
-    if (triggered && (state.reminderCount - state.lastReminderAt) < COOLDOWN_EDITS) triggered = false;
+    if (triggered && (state.callCount - state.lastReminderAt) < COOLDOWN_EDITS) triggered = false;
 
     if (triggered) {
-      state.lastReminderAt = state.reminderCount;
+      state.lastReminderAt = state.callCount;
       state.reminderCount++;
       saveState(sid, state);
       ctx.sink.fire('/api/hook/review-suggestion', { session_id: sid, file_count: fc, total_lines: state.totalLines, reason: reason });
@@ -88,7 +97,7 @@ module.exports = {
         ctx.log('[AutoReview] triggering review...');
         runReview(ctx).then(function (result) {
           if (result) {
-            var out = '\n=== Auto Review ===\n' + result + '\n=== End ===\n';
+            const out = '\n=== Auto Review ===\n' + result + '\n=== End ===\n';
             process.stderr.write(out);
           }
         }).catch(function (e) {
