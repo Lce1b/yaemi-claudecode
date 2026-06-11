@@ -19,7 +19,7 @@ module.exports = {
   on: 'PreToolUse',
   match: function(e) { return e.tool_name === 'Bash'; },
   priority: 54,
-  profile: ['standard', 'strict'],
+  profile: ['minimal', 'standard', 'strict'],
   run: async function(event, ctx) {
     var cmd = extractCmd(event);
     if (!cmd) return { exitCode: 0 };

@@ -46,7 +46,7 @@ module.exports = {
   on: 'PreToolUse',
   match: (event) => event.tool_name === 'Write',
   priority: 380,
-  profile: ['standard', 'strict'],
+  profile: ['strict'],
 
   /**
    * @param {Object} event - Parsed hook event

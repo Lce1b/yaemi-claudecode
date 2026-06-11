@@ -19,7 +19,7 @@ module.exports = {
   on: 'PreToolUse',
   match: function(e) { return e.tool_name === 'Bash'; },
   priority: 60,
-  profile: ['strict'],
+  profile: ['standard', 'strict'],
   run: async function(event, ctx) {
     var cmd = extractCmd(event);
     if (!cmd || !cmd.includes('git commit') || !cmd.includes('-m')) {

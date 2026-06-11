@@ -11,7 +11,7 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 module.exports = {
   on: 'PostToolUse',
   match: () => true,
-  priority: 500, profile: ['minimal', 'standard', 'strict'],
+  priority: 500, profile: ['standard', 'strict'],
   async run(event, ctx) {
     try {
       var tn = event.tool_name || 'Unknown', fp = event.tool_input && event.tool_input.file_path;

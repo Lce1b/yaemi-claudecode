@@ -13,7 +13,7 @@ module.exports = {
   on: 'PreToolUse',
   match: function(e) { return e.tool_name === 'Bash'; },
   priority: 50,
-  profile: ['minimal', 'standard', 'strict'],
+  profile: ['standard', 'strict'],
   run: async function(event, ctx) {
     const cmd = extractCmd(event);
     if (cmd && READONLY_CMD.test(cmd)) {

@@ -9,7 +9,7 @@ module.exports = {
   on: 'PreCompact',
   match: function() { return true; },
   priority: 50,
-  profile: ['standard', 'strict'],
+  profile: ['strict'],
   run: async function(event, ctx) {
     const sessionId = event.session_id || 'unknown';
     const cwd = event.cwd || process.cwd();

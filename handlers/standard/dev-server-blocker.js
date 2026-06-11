@@ -2,21 +2,10 @@
 
 const extractCmd = require('../../lib/utils').extractCmd;
 
-const DEV_SERVERS = [
-  /^npm\s+run\s+dev/,
-  /^npm\s+start/,
-  /^cargo\s+run/,
-  /^pnpm\s+dev/,
-  /^yarn\s+dev/,
-  /^npx\s+vite/,
-  /^next\s+dev/,
-  /^python\s+-m\s+http\.server/,
-  /^python\s+-m\s+uvicorn/,
-  /^flask\s+run/,
-];
+const { DEV_SERVER_PATTERNS } = require('../../lib/config');
 
 function isDevServer(cmd) {
-  return DEV_SERVERS.some(function(re) { return re.test(cmd); });
+  return DEV_SERVER_PATTERNS.some(function(re) { return re.test(cmd); });
 }
 
 function inTmux() {
@@ -27,7 +16,7 @@ module.exports = {
   on: 'PreToolUse',
   match: function(e) { return e.tool_name === 'Bash'; },
   priority: 58,
-  profile: ['strict'],
+  profile: ['standard', 'strict'],
   run: async function(event, ctx) {
     var cmd = extractCmd(event);
     if (!cmd || !isDevServer(cmd) || inTmux()) return { exitCode: 0 };

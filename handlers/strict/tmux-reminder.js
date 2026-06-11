@@ -2,20 +2,10 @@
 
 const extractCmd = require('../../lib/utils').extractCmd;
 
-const LONG_RUNNING = [
-  /^npm\s+run\s+dev/,
-  /^npm\s+start/,
-  /^cargo\s+run/,
-  /^cargo\s+watch/,
-  /^pnpm\s+dev/,
-  /^yarn\s+dev/,
-  /^python\s+-m\s+http\.server/,
-  /^npx\s+vite/,
-  /^next\s+dev/,
-];
+const { DEV_SERVER_PATTERNS } = require('../../lib/config');
 
 function isLongRunning(cmd) {
-  return LONG_RUNNING.some(function(re) { return re.test(cmd); });
+  return DEV_SERVER_PATTERNS.some(function(re) { return re.test(cmd); });
 }
 
 function inTmux() {

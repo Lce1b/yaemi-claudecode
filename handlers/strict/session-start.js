@@ -78,7 +78,7 @@ module.exports = {
   on: 'SessionStart',
   match: () => true,
   priority: 10,
-  profile: ['minimal', 'standard', 'strict'],
+  profile: ['standard', 'strict'],
 
   async run(event, ctx) {
     const cwd = event.cwd || process.cwd();

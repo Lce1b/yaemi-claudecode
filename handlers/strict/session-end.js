@@ -58,7 +58,7 @@ function persistSession(event) {
 }
 
 module.exports = {
-  on: 'Stop', match: () => true, priority: 50, profile: ['minimal', 'standard', 'strict'],
+  on: 'Stop', match: () => true, priority: 50, profile: ['standard', 'strict'],
   async run(event, ctx) { persistSession(event); return { exitCode: 0 }; },
   persistSession,
 };

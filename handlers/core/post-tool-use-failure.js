@@ -13,6 +13,7 @@
 const path = require('path');
 const fs = require('fs');
 const config = require('../../lib/config');
+const { extractMcpTarget } = require('../../lib/utils');
 const { atomicWrite } = require('../../lib/state-store');
 
 const STATE_FILE = path.join(config.DATA_DIR, 'mcp-health.json');
@@ -33,14 +34,6 @@ function markUnhealthy(state, server, now, reason, detail) {
   s.lastFailureReason = reason;
   if (detail) s.lastFailureDetail = detail.substring(0, 500);
   s.status = 'unhealthy';
-}
-
-function extractMcpTarget(input) {
-  const toolName = String(input.tool_name || input.name || '');
-  if (!toolName.startsWith('mcp__')) return null;
-  const segments = toolName.slice(5).split('__');
-  if (segments.length < 1 || !segments[0]) return null;
-  return { server: segments[0], tool: segments.slice(1).join('__') };
 }
 
 module.exports = {

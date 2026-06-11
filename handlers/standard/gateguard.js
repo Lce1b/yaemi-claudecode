@@ -39,7 +39,7 @@ function isFileChecked(sid, fp) { return loadGateState(sid).checked.indexOf(fp) 
 function markFileChecked(sid, fp) { var state = loadGateState(sid); if (state.checked.indexOf(fp) === -1) { state.checked.push(fp); saveGateState(sid, state); } }
 function gateMsg() { return '[GateGuard] Before editing, present these facts:\n\n1. List ALL files that import/require this file (use Grep)\n2. List the public API affected by this change\n3. Show the data model/schema this file relies on\n4. Quote the user\'s current instruction verbatim\n\nPresent the facts, then retry the same operation.'; }
 function isTestFile(fp) { if (!fp) return false; var n = fp.replace(/\\/g, '/'); var b = path.basename(n); var pats = [/\.test\./, /\.spec\./, /_test\./, /_spec\./, /^test_/, /^spec_/, /\/tests\//, /\/spec\//, /\/__tests__\//]; for (var i = 0; i < pats.length; i++) { if (pats[i].test(n) || pats[i].test(b)) return true; } }
-function classifyFileSize(fp) { if (!fp) return 'absent'; try { var r = path.resolve(fp); if (!fs.existsSync(r)) return 'absent'; var fd = fs.openSync(r, 'r'); var buf = Buffer.alloc(65536); var bytes = 0; var newlines = 0; while ((bytes = fs.readSync(fd, buf, 0, buf.length, null)) > 0) { for (var i = 0; i < bytes; i++) { if (buf[i] === 10) { newlines++; if (newlines > 200) { fs.closeSync(fd); return 'large'; } } } } fs.closeSync(fd); var lines = newlines + 1; if (lines < 50) return 'small'; if (lines <= 200) return 'medium'; return 'large'; } catch (_) { return 'absent'; } }
+function classifyFileSize(fp) { if (!fp) return 'absent'; try { var r = path.resolve(fp); if (!fs.existsSync(r)) return 'absent'; var fd = fs.openSync(r, 'r'); try { var buf = Buffer.alloc(65536); var bytes = 0; var newlines = 0; while ((bytes = fs.readSync(fd, buf, 0, buf.length, null)) > 0) { for (var i = 0; i < bytes; i++) { if (buf[i] === 10) { newlines++; if (newlines > 200) { return 'large'; } } } } var lines = newlines + 1; if (lines < 50) return 'small'; if (lines <= 200) return 'medium'; return 'large'; } finally { fs.closeSync(fd); } } catch (_) { return 'absent'; } }
 function gateMsgMedium() { return '[GateGuard] Before editing, provide brief context:\n\n1. Show the data model/schema this change affects\n2. Quote the user\'s current instruction verbatim\n\nProvide context, then retry the same operation.'; }
 
 function checkSingleFile(fp, sid) {
@@ -57,7 +57,7 @@ function checkSingleFile(fp, sid) {
 module.exports = {
   on: 'PreToolUse',
   match: function(e) { var t = e.tool_name || ''; return t === 'Write' || t === 'Edit' || t === 'MultiEdit'; },
-  priority: 80, profile: ['strict'],
+  priority: 80, profile: ['standard', 'strict'],
   run: async function(event, ctx) {
     if (!isHookEnabled('gateguard', 'standard,strict')) return { exitCode: 0 };
     var tn = event.tool_name || '', ti = event.tool_input || {}, sid = getSessionId(event);

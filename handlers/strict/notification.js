@@ -8,7 +8,7 @@ module.exports = {
     return ntype === 'idle_prompt' || ntype === 'permission_prompt';
   },
   priority: 10,
-  profile: ['minimal', 'standard', 'strict'],
+  profile: ['standard', 'strict'],
 
   async run(event, ctx) {
     const ntype = event.notification_type || '';

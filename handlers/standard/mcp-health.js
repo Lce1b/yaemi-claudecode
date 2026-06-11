@@ -4,6 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const config = require('../../lib/config');
+const { extractMcpTarget } = require('../../lib/utils');
 const { atomicWrite, readJSON } = require('../../lib/state-store');
 
 const STATE_FILE = path.join(config.DATA_DIR, 'mcp-health.json');
@@ -22,14 +23,6 @@ function getKnownServers() {
     }
   }
   return servers;
-}
-
-function extractMcpTarget(input) {
-  var toolName = String(input.tool_name || input.name || '');
-  if (!toolName.startsWith('mcp__')) return null;
-  var segments = toolName.slice(5).split('__');
-  if (segments.length < 1 || !segments[0]) return null;
-  return { server: segments[0], tool: segments.slice(1).join('__') };
 }
 
 function loadState() {

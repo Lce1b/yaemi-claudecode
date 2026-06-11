@@ -6,7 +6,7 @@ module.exports = {
   on: 'PreToolUse',
   match: function(e) { return e.tool_name === 'Bash'; },
   priority: 62,
-  profile: ['strict'],
+  profile: ['standard', 'strict'],
   run: async function(event, ctx) {
     var cmd = extractCmd(event);
     if (!cmd || !/git\s+push/.test(cmd)) return { exitCode: 0 };

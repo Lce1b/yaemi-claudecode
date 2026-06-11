@@ -10,7 +10,7 @@ function loadTrends() { try { return JSON.parse(fs.readFileSync(TREND_FILE, 'utf
 function saveTrends(d) { try { fs.mkdirSync(path.dirname(TREND_FILE), { recursive: true }); fs.writeFileSync(TREND_FILE, JSON.stringify(d, null, 2), 'utf8'); } catch (_) {} }
 
 module.exports = {
-  on: 'Stop', match: () => true, priority: 300, profile: ['standard', 'strict'],
+  on: 'Stop', match: () => true, priority: 300, profile: ['strict'],
   async run(event, ctx) {
     const trends = loadTrends(), sid = event.session_id || 'unknown';
     const usage = event.usage || {}, tIn = usage.input_tokens || 0, tOut = usage.output_tokens || 0;

@@ -9,16 +9,20 @@
 
 const { execFileSync } = require('child_process');
 
+function esc(s) {
+  return String(s).replace(/["\\]/g, '\\$&');
+}
+
 function notify(title, message) {
   try {
     if (process.platform === 'darwin') {
       execFileSync('osascript', [
-        '-e', 'display notification "' + message + '" with title "' + title + '"'
+        '-e', 'display notification "' + esc(message) + '" with title "' + esc(title) + '"'
       ], { timeout: 5000 });
     } else if (process.platform === 'win32') {
       const ps = '$t=[Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent(1);' +
-        '$t.SelectSingleNode("//text[1]").InnerText="' + title + '";' +
-        '$t.SelectSingleNode("//text[2]").InnerText="' + message + '"';
+        '$t.SelectSingleNode("//text[1]").InnerText="' + esc(title) + '";' +
+        '$t.SelectSingleNode("//text[2]").InnerText="' + esc(message) + '"';
       execFileSync('powershell', ['-Command', ps], { timeout: 5000, windowsHide: true });
     } else {
       execFileSync('notify-send', [title, message], { timeout: 5000 });
