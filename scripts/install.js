@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+require('../lib/splash').show();
+
 /**
  * yhk install — one-command setup for yaemi-claudecode hooks.
  *
