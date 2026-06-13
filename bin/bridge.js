@@ -16,7 +16,7 @@ if (cliArgs.length > 0 && (CLI_CMDS.has(cliArgs[0]) || cliArgs[0] === '--help' |
  */
 
 const path = require('path');
-const { readStdinSync, debugLog } = require('../lib/utils');
+const { readStdin, debugLog } = require('../lib/utils');
 const { scanHandlers, forEvent } = require('../lib/registry');
 const { createContext } = require('../lib/context');
 const { createSink } = require('../lib/sink');
@@ -30,14 +30,19 @@ function getHandlers() {
   if (!_handlers) {
     _handlers = scanHandlers(HANDLERS_DIR, PLUGIN_ROOT);
     // Also scan project-local custom handlers
-    const customDir = path.join(process.cwd(), '.claude', 'hooks', 'custom');
-    try {
-      const fs = require('fs');
-      if (fs.existsSync(customDir) && fs.statSync(customDir).isDirectory()) {
-        const custom = scanHandlers(customDir, customDir);
-        _handlers = _handlers.concat(custom);
-      }
-    } catch (_) { /* custom dir not required */ }
+    const fs = require('fs');
+    const customDirs = [
+      path.join(process.cwd(), '.claude', 'hooks', 'custom'),
+      path.join(process.cwd(), '.yae-miko', 'hooks', 'custom'),
+    ];
+    for (const customDir of customDirs) {
+      try {
+        if (fs.existsSync(customDir) && fs.statSync(customDir).isDirectory()) {
+          const custom = scanHandlers(customDir, customDir);
+          _handlers = _handlers.concat(custom);
+        }
+      } catch (_) { /* custom dir not required */ }
+    }
   }
   return _handlers;
 }
@@ -127,7 +132,7 @@ async function runPipeline(event, rawInput) {
 }
 
 async function main() {
-  const rawInput = readStdinSync();
+  const rawInput = await readStdin();
   if (!rawInput) { process.exit(0); }
 
   let event;
